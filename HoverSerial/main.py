@@ -5,30 +5,30 @@ import time
 
 def thread_send_command():
 
-    #constantes
+    #Constantes
     SPEED_MAX_TEST = 300  # [-] Maximum speed for testing
-    SPEED_STEP = 20  # [-] Speed step
-    TIME_SEND = 100  # [ms] Sending time interval
+    SPEED_STEP = 2  # [-] Speed step
+    TIME_SEND = 0.1  # [s] Sending time interval
 
-    #local variables
+    #Local variables
     iStep = SPEED_STEP
     iTest = 0
     steer = 0
-    start_time = 0
+    startTime = 0
 
     while True:
 
-        # Calculate elapsed_time
-        elapsed_time = time.time() - start_time
-        if elapsed_time < TIME_SEND:
+        # Calculate elapsed time
+        elapsedTime = time.time() - startTime
+        if elapsedTime < TIME_SEND:
             continue
-        start_time = time.time()
+        startTime = time.time()
 
         # Calculate test command speed
         speed = SPEED_MAX_TEST-2*abs(iTest)
 
         # Send commands
-        hover_serial.send_command(steer, 100)
+        hover_serial.send_command(steer, speed)
         print('Sending:\t steer: '+str(steer)+'speed: '+str(speed))
 
         # invert step if reaching limit
@@ -45,8 +45,8 @@ def thread_receive_feedback():
 
         if feedback == None:
             continue
-        else:
-            print('Receiving:\t', feedback)
+        
+        print('Receiving:\t', feedback)
 
 
 if __name__ == "__main__":

@@ -21,8 +21,8 @@ class Hoverboard_serial:
         Speed(signed int16) : Speed with range -1000 to 1000
         Checksum(unsigned int16) : XOR checksum
         '''
-        steerBytes = steer.to_bytes(2, byteorder="little")
-        speedBytes = speed.to_bytes(2, byteorder="little")
+        steerBytes = steer.to_bytes(2, byteorder="little",signed=True)
+        speedBytes = speed.to_bytes(2, byteorder="little",signed=True)
         checksumBytes = bytes(a^b^c for (a, b, c) in zip(self.startBytes, steerBytes, speedBytes))
 
         command = self.startBytes+steerBytes+speedBytes+checksumBytes
@@ -44,29 +44,39 @@ class Hoverboard_serial:
         Temperature(signed int16) : Temperature in °C *10
         Led(unsigned int16) : Used to control the leds on the sideboard
         Checksum(unsigned int16) : XOR checksum
-
         '''
 
+        # Read incomingByte and Construct the start frame
         incomingByte = self.uart.read()
         bufStartFrame = self.incomingBytesPrev+incomingByte
         
+        # Control bufStartFrame is startBytes
         if bufStartFrame != self.startBytes:
             self.incomingBytesPrev=incomingByte
             return
+        
         else:
             feedback = {"cmd1":0, "cmd2":0, "speedR_meas":0, "speedL_meas":0, "batVoltage":0, "boardTemp":0, "cmdLed":0}
-            checksumBytes=bufStartFrame
+            checksumBytesCalculate=bufStartFrame
     
-            for element in feedback.items():
+            for key,value in feedback.items():
+                
+                # Read 2 Next Bytes
                 elementBytes=self.uart.read(2)
-                feedback[element]=int.from_bytes(elementBytes, byteorder='big')
-                checksumBytes = bytes(a^b for (a, b) in zip(checksumBytes, elementBytes))
-
-            #print(feedback,feedback)
-            lastBytes=self.uart.read(2)
-            if checksumBytes == lastBytes:
-                print("checksumBytes True")
+                
+                # Convert 2 Bytes to Integer in feedback dictionnary
+                feedback[key]=int.from_bytes(elementBytes, byteorder='little',signed=True)
+                
+                # Calculate checksumBytes
+                checksumBytesCalculate = bytes(a^b for (a, b) in zip(checksumBytesCalculate, elementBytes))
+                
+            # Control checksumBytes Read is checksumBytes Calculate
+            checksumBytesRead=self.uart.read(2)
+            if checksumBytesCalculate == checksumBytesRead:
+                #print("checksumBytes True")
                 return feedback
+            else:
+                print("checksumBytes False")
             
             return
             
