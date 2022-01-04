@@ -1,6 +1,6 @@
-# HoverSerial Python
+# HoverSerial Raspberry Pi
 
- • This Script uses the Serial interface to communicate and send commands to the hoverboard
+ • This Python Script uses the Serial interface to communicate and send commands to the hoverboard
 
  • Firmware hack the hoverboard find this Link :
 https://github.com/EFeru/hoverboard-firmware-hack-FOC
